@@ -46,63 +46,63 @@ public class PreBootListener extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (context.getUserId() != UserHandle.USER_SYSTEM) {
-            return;
-        }
-        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-
-        mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        mPackageManager = context.getPackageManager();
-
-        // Check for device owner.
-        final ComponentName deviceOwnerComponent =
-                mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser();
-        if (deviceOwnerComponent != null) {
-            int deviceOwnerUserId = mDevicePolicyManager.getDeviceOwnerUserId();
-
-            if(DeleteNonRequiredAppsTask.shouldDeleteNonRequiredApps(context, deviceOwnerUserId)) {
-
-                // Delete new apps.
-                new DeleteNonRequiredAppsTask(context, deviceOwnerComponent.getPackageName(),
-                        DeleteNonRequiredAppsTask.DEVICE_OWNER,
-                        false /* not creating new profile */,
-                        deviceOwnerUserId,
-                        false /* delete non-required system apps */,
-                        new DeleteNonRequiredAppsTask.Callback() {
-
-                            @Override
-                            public void onSuccess() {
-                            }
-
-                            @Override
-                            public void onError() {
-                                ProvisionLogger.loge("Error while checking if there are new system "
-                                        + "apps that need to be deleted");
-                            }
-                        }).run();
-            }
-
-            // Ensure additional users cannot be created if we're in the state necessary to require
-            // that.
-            boolean splitSystemUser = UserManager.isSplitSystemUser();
-            new DisallowAddUserTask(mUserManager, deviceOwnerUserId, splitSystemUser)
-                    .maybeDisallowAddUsers();
-        }
-
-        for (UserInfo userInfo : mUserManager.getUsers()) {
-            if (userInfo.isManagedProfile()) {
-                mUserManager.setUserRestriction(UserManager.DISALLOW_WALLPAPER, true,
-                        userInfo.getUserHandle());
-                // Enabling telecom package as it supports managed profiles from N.
-                installTelecomAsUser(userInfo.id);
-                runManagedProfileDisablingTasks(userInfo.id, context);
-            } else {
-                // if this user has managed profiles, reset the cross-profile intent filters between
-                // this user and its managed profiles.
-                resetCrossProfileIntentFilters(userInfo.id);
-            }
-        }
+        // if (context.getUserId() != UserHandle.USER_SYSTEM) {
+        //     return;
+        // }
+        // mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        //
+        // mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
+        //         Context.DEVICE_POLICY_SERVICE);
+        // mPackageManager = context.getPackageManager();
+        //
+        // // Check for device owner.
+        // final ComponentName deviceOwnerComponent =
+        //         mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser();
+        // if (deviceOwnerComponent != null) {
+        //     int deviceOwnerUserId = mDevicePolicyManager.getDeviceOwnerUserId();
+        //
+        //     if(DeleteNonRequiredAppsTask.shouldDeleteNonRequiredApps(context, deviceOwnerUserId)) {
+        //
+        //         // Delete new apps.
+        //         new DeleteNonRequiredAppsTask(context, deviceOwnerComponent.getPackageName(),
+        //                 DeleteNonRequiredAppsTask.DEVICE_OWNER,
+        //                 false #<{(| not creating new profile |)}>#,
+        //                 deviceOwnerUserId,
+        //                 false #<{(| delete non-required system apps |)}>#,
+        //                 new DeleteNonRequiredAppsTask.Callback() {
+        //
+        //                     @Override
+        //                     public void onSuccess() {
+        //                     }
+        //
+        //                     @Override
+        //                     public void onError() {
+        //                         ProvisionLogger.loge("Error while checking if there are new system "
+        //                                 + "apps that need to be deleted");
+        //                     }
+        //                 }).run();
+        //     }
+        //
+        //     // Ensure additional users cannot be created if we're in the state necessary to require
+        //     // that.
+        //     boolean splitSystemUser = UserManager.isSplitSystemUser();
+        //     new DisallowAddUserTask(mUserManager, deviceOwnerUserId, splitSystemUser)
+        //             .maybeDisallowAddUsers();
+        // }
+        //
+        // for (UserInfo userInfo : mUserManager.getUsers()) {
+        //     if (userInfo.isManagedProfile()) {
+        //         mUserManager.setUserRestriction(UserManager.DISALLOW_WALLPAPER, true,
+        //                 userInfo.getUserHandle());
+        //         // Enabling telecom package as it supports managed profiles from N.
+        //         installTelecomAsUser(userInfo.id);
+        //         runManagedProfileDisablingTasks(userInfo.id, context);
+        //     } else {
+        //         // if this user has managed profiles, reset the cross-profile intent filters between
+        //         // this user and its managed profiles.
+        //         resetCrossProfileIntentFilters(userInfo.id);
+        //     }
+        // }
     }
 
     /**
